@@ -3,7 +3,6 @@
 	import Output from "./lib/Output.svelte";
 	import { FFmpeg } from "@ffmpeg/ffmpeg";
 	import { toBlobURL, fetchFile } from "@ffmpeg/util";
-	import { onDestroy } from "svelte";
 	// import mime from "mime-types";
 
 	const baseURL = "https://unpkg.com/@ffmpeg/core-mt@0.12.2/dist/esm";
@@ -12,6 +11,7 @@
 	$: output_blob = "";
 	$: output = false;
 	$: userMessage = "";
+	let hh = "00", mm = "00", ss = "05";
 	// @ts-ignore
 	let output_div;
 	let output_component: Output;
@@ -115,15 +115,15 @@
 			progress.innerHTML = "Loading ffmpeg-core.js";
 			await ffmpeg.load({
 				coreURL: await toBlobURL(
-					`${baseURL}/ffmpeg-core.js`,
+					`ffmpeg-core.js`,
 					"text/javascript"
 				),
 				wasmURL: await toBlobURL(
-					`${baseURL}/ffmpeg-core.wasm`,
+					`ffmpeg-core.wasm`,
 					"applicaiton/wasm"
 				),
 				workerURL: await toBlobURL(
-					`${baseURL}/ffmpeg-core.worker.js`,
+					`ffmpeg-core.worker.js`,
 					"text/javascript"
 				),
 			});
@@ -136,7 +136,7 @@
 			const fileName = video.files[0].name;
 			await ffmpeg.writeFile(fileName, await fetchFile(videoURL));
 
-			let params = ["-t", "00:00:03", "-i", fileName, "-preset", quality];
+			let params = ["-t", `${hh}:${mm}:${ss}`, "-i", fileName, "-preset", quality];
 
 			if (color_filter === "vivid") {
 				params = params.concat(["-vf", "hue=h=19:s=3:b=0.8"]);
@@ -230,6 +230,9 @@
 			<option value="gif">GIF</option>
 			<option value="mp4">MP4</option>
 			<option value="webm">WEBM</option>
+			<option value="png">PNG (first frame)</option>
+			<option value="jpg">JPEG (first frame)</option>
+			<option value="apng">Animated PNG (APNG)</option>
 		</select>
 		<select
 			name="colorFilter"
@@ -237,35 +240,63 @@
 			bind:value={color_filter}
 			on:change={reset}
 		>
-			<option value="none">None</option>
+			<option value="none">Color Filter</option>
 			<option value="vintage">Vintage</option>
 			<option value="vivid">Vivid</option>
 			<option value="monochrome">Monochrome</option>
 		</select>
-		<button
-			id="convert"
-			on:click={convert}
-			class="border border-solid border-black border-3 p-2 ml-2 mr-0"
-			bind:this={convertBtn}>Convert</button
-		>
-		{#if !output_blob}
-			<button
-				on:click={cancel}
-				disabled={true}
-				bind:this={cancelButton}
-				class="border border-solid border-black border-3 p-2 m-0.5"
-				>Cancel</button
-			>
-		{/if}
-		<div id="progress" />
-		{#key output_blob}
-		<div bind:this={output_div}>
-			<Output
-				{output_blob}
-				{output_blob_type}
-				bind:this={output_component}
+		<div class="flex flex-row">
+			<input
+				type="numeric"
+				class="border border-black"
+				name="hh"
+				id="hh"
+				placeholder="hh"
+				bind:value={hh}
+			/><b>:</b>
+			<input
+				type="numeric"
+				class="border border-black"
+				name="mm"
+				id="mm"
+				placeholder="mm"
+				bind:value={mm}
+			/><b>:</b>
+			<input
+				type="numeric"
+				class="border border-black"
+				name="ss"
+				id="ss"
+				placeholder="ss"
+				bind:value={ss}
 			/>
 		</div>
+		<div class="flex flex-row align-middle justify-center">
+			<button
+				id="convert"
+				on:click={convert}
+				class="border border-solid border-black border-3 p-2 m-0.5"
+				bind:this={convertBtn}>Convert</button
+			>
+			{#if !output_blob}
+				<button
+					on:click={cancel}
+					disabled={true}
+					bind:this={cancelButton}
+					class="border border-solid border-black border-3 p-2 m-0.5 disabled:text-gray-600 disabled:border-gray-600 disabled:cursor-not-allowed"
+					>Cancel</button
+				>
+			{/if}
+		</div>
+		<div id="progress" />
+		{#key output_blob}
+			<div bind:this={output_div}>
+				<Output
+					{output_blob}
+					{output_blob_type}
+					bind:this={output_component}
+				/>
+			</div>
 		{/key}
 	</div>
 	{#if !output_blob}
