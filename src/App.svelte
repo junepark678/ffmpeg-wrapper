@@ -115,15 +115,15 @@
 			progress.innerHTML = "Loading ffmpeg-core.js";
 			await ffmpeg.load({
 				coreURL: await toBlobURL(
-					`ffmpeg-core.js`,
+					`https://github.com/junepark678/ffmpeg-wrapper/raw/master/ffmpeg-core.js`,
 					"text/javascript"
 				),
 				wasmURL: await toBlobURL(
-					`ffmpeg-core.wasm`,
+					`https://github.com/junepark678/ffmpeg-wrapper/raw/master/ffmpeg-core.wasm`,
 					"applicaiton/wasm"
 				),
 				workerURL: await toBlobURL(
-					`ffmpeg-core.worker.js`,
+					`https://github.com/junepark678/ffmpeg-wrapper/raw/master/ffmpeg-core.worker.js`,
 					"text/javascript"
 				),
 			});
